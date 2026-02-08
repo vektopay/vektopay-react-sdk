@@ -12,6 +12,13 @@ npm install @vektopay/react
 
 ## Usage
 
+### 1) Create A Token Server-Side
+
+Your backend should create a checkout session token (via `POST /v1/checkout-sessions`) and send that token to the browser.
+Payments are created via `/v1/payments` inside the checkout flow.
+
+### 2) Use The Token In The Browser
+
 ```tsx
 import {
   VektopayCheckoutButton,
