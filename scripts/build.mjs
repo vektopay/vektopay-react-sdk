@@ -6,7 +6,11 @@ const root = resolve(".");
 const dist = resolve(root, "dist");
 mkdirSync(dist, { recursive: true });
 
-run("bun", ["build", "src/index.tsx", "--outdir", "dist", "--format", "esm"], root);
+run(
+  "bun",
+  ["build", "src/index.tsx", "--outdir", "dist", "--format", "esm"],
+  root,
+);
 run(
   "bunx",
   [

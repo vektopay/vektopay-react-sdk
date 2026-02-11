@@ -57,11 +57,17 @@ type TokenizeCardInput = {
 type TokenizeCardOptions = {
   apiBase?: string;
   evervault?: { enabled?: boolean; js_url?: string; app_id?: string };
-  selected_providers?: Array<"evervault" | "mercadopago" | "pagarme" | "stripe">;
+  selected_providers?: Array<
+    "evervault" | "mercadopago" | "pagarme" | "stripe"
+  >;
   providers?: {
     mercadopago?: { public_key?: string; script_url?: string; locale?: string };
     pagarme?: { app_id?: string; public_key?: string; script_url?: string };
-    stripe?: { public_key?: string; script_url?: string; card_element?: unknown };
+    stripe?: {
+      public_key?: string;
+      script_url?: string;
+      card_element?: unknown;
+    };
   };
   adapters?: Record<string, (...args: unknown[]) => Promise<unknown>>;
   pix?: { provider?: "abacatepay" | "woovi" };
