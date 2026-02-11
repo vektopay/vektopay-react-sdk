@@ -33,6 +33,54 @@ type CardElementHandle = {
   validate: () => void;
 };
 
+type ProviderTokenResult = {
+  status: "success" | "error";
+  token_id?: string;
+  token_type?: string;
+  fingerprint_id?: string;
+  error_code?: string;
+  error_message?: string;
+  meta?: Record<string, unknown> | null;
+};
+
+type TokenizeCardInput = {
+  card_number: string;
+  holder_name?: string;
+  exp_month: string;
+  exp_year: string;
+  cvv: string;
+  document_number?: string;
+  document_type?: "CPF" | "CNPJ";
+  email?: string;
+};
+
+type TokenizeCardOptions = {
+  apiBase?: string;
+  evervault?: { enabled?: boolean; js_url?: string; app_id?: string };
+  selected_providers?: Array<
+    "evervault" | "mercadopago" | "pagarme" | "stripe"
+  >;
+  providers?: {
+    mercadopago?: { public_key?: string; script_url?: string; locale?: string };
+    pagarme?: { app_id?: string; public_key?: string; script_url?: string };
+    stripe?: {
+      public_key?: string;
+      script_url?: string;
+      card_element?: unknown;
+    };
+  };
+  adapters?: Record<string, (...args: unknown[]) => Promise<unknown>>;
+  pix?: { provider?: "abacatepay" | "woovi" };
+};
+
+type TokenizeCardResult = {
+  success: boolean;
+  providers: Record<string, ProviderTokenResult>;
+  provider_meta?: Record<string, unknown>;
+  masked: { last4: string; brand: string };
+  elapsed_ms: number;
+};
+
 type CardElementProps = CheckoutScriptOptions & {
   className?: string;
   style?: React.CSSProperties;
@@ -51,6 +99,16 @@ declare global {
         mountSelector: string,
         options?: CheckoutScriptOptions,
       ) => Promise<CardElementHandle>;
+      tokenizeCard?: (
+        input: TokenizeCardInput,
+        options?: TokenizeCardOptions,
+      ) => Promise<TokenizeCardResult>;
+      pix?: {
+        createCharge?: (
+          input: Record<string, unknown>,
+          options?: TokenizeCardOptions,
+        ) => Promise<unknown>;
+      };
     };
   }
 }
@@ -172,6 +230,28 @@ export function VektopayCardElement({
   }, [apiBase, id, onReady, onError]);
 
   return <div id={id} className={className} style={style} />;
+}
+
+export async function tokenizeCard(
+  input: TokenizeCardInput,
+  options: TokenizeCardOptions = {},
+) {
+  await loadCheckoutScript({ apiBase: options.apiBase });
+  if (!window.VektopayElements?.tokenizeCard) {
+    throw new Error("tokenize_card_not_available");
+  }
+  return window.VektopayElements.tokenizeCard(input, options);
+}
+
+export async function createPixCharge(
+  input: Record<string, unknown>,
+  options: TokenizeCardOptions = {},
+) {
+  await loadCheckoutScript({ apiBase: options.apiBase });
+  if (!window.VektopayElements?.pix?.createCharge) {
+    throw new Error("pix_create_charge_not_available");
+  }
+  return window.VektopayElements.pix.createCharge(input, options);
 }
 
 export { loadCheckoutScript };
